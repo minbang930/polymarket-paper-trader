@@ -11,3 +11,6 @@ build/
 .claude/projects/
 .claude/plans/
 .coverage
+
+.jev-paper/
+jev-runs/

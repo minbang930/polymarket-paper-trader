@@ -40,6 +40,55 @@ uv pip install -e ".[dev]"
 
 Requires Python 3.10+.
 
+
+## Jev paper experiment via OpenRouter
+
+This fork includes an optional Jev experiment in `examples/jev_paper.py`. It
+uses **live public Polymarket Gamma/CLOB data** but sends **no real orders** and
+requires no wallet or Polymarket private key. The paper engine simulates fills
+locally in SQLite.
+
+Jev is called through OpenRouter's Decisions API (not chat completions).
+
+PowerShell:
+
+```powershell
+$env:OPENROUTER_API_KEY="sk-or-..."
+python examples/jev_paper.py --cycles 20
+```
+
+Run continuously until Ctrl+C:
+
+```powershell
+python examples/jev_paper.py --cycles 0 --interval 15
+```
+
+Useful experiment controls:
+
+```text
+--markets 5           number of high-liquidity markets evaluated per cycle
+--trade-usd 25        maximum paper dollars per entry
+--agreement 3         consecutive high-confidence direction votes required
+--min-direction 0.75  minimum Jev direction probability
+--min-intent 0.70     minimum Jev enter/exit probability
+--model MODEL         default: ~typesafe/jev-latest
+```
+
+The default transport is:
+
+```text
+POST https://openrouter.ai/api/alpha/decisions
+model = ~typesafe/jev-latest
+key   = OPENROUTER_API_KEY
+```
+
+The model only produces typed judgments (`direction`, `intent`, `regime`,
+`quality`). Deterministic code owns the final action. New entries require
+consecutive agreement and are blocked in a toxic regime; Jev is allowed to
+reduce an existing paper position more easily than it can add risk.
+
+Runtime data is stored under `.jev-paper/` and `jev-runs/`, both gitignored.
+
 ## Not a toy — this is a real exchange simulator
 
 Other tools mock prices or use random numbers. We simulate the actual exchange:
